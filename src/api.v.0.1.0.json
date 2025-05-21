@@ -1,0 +1,2755 @@
+{
+  "api-version": "0.1.0",
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tarana Wireless Service Availability API",
+    "summary": "AI/ML RF Service Availability Predictor",
+    "description": "\nUses AI/ML to provide improved path loss and data rate predictions given ground truth from all existing Tarana links.\n\n## Predict\n\nYou can post a **Sector** with a list of RNs to predict path loss & speed for, along with an optional list of RN heights, and an optional single BN (or the best BN will be determined from TCS).\n\nYou can post a **MultiSector** with a list of RNs to predict path loss & speed for, along with an optional list of RN heights, and an optional BN list used in addition to BNs in TCS for predictions.\n\nReturns either **SectorOutput** with predicted path loss & speed, along with a profile picture, for all RNs, or\n\nReturns **MultiSectorOutput** with multiple sectors, each with a BN and multiple RNs with predicted path loss & speed, along with a profile picture, for all RNs\n\nYou can post a **ReportRequest** with an optional number of days.\n\nReturns **ReportOutput** with a combined .csv file containing information on all predictions performed in the last number of days (default of 7).\n\n## Predict CSV\n\nYou can post a **.csv file of RNs** to predict path loss & speed for, along with an optional **.csv file of RN heights**, and an optional **.csv file of BNs** used in addition to BNs in TCS for predictions.\n\nReturns **MultiSectorOutput** with multiple sectors, each with a BN and multiple RNs with predicted path loss & speed, along with a profile picture, for all RNs\n\n## Heatmap\n\nYou can post a **HeatMap** with an optional list of heights, and a single BN.\n\nYou can post a **MultiHeatMap** with an optional list of heights, and a list of BNs to be used for heatmap creation.\n\nReturns either **HeatMapOutput** with created heatmaps for a BN, or\n\nReturns **MultiHeatmapOutput** with multiple sectors, each with a BN and created heatmaps\n\n## Heatmap CSV\n\nYou can post a **.csv file of BNs** to create heatmaps for, along with an optional **.csv file of heights**\n\nReturns **MultiHeatMapOutput** with multiple sectors, each with a BN with created heatmaps\n\n## Health\n\nYou can test whether an API key is working or not.  Returns the name of the operator associated with the key.\n\n",
+    "termsOfService": "https://www.taranawireless.com/legal/#tcs-terms-of-use",
+    "contact": {
+      "name": "Tarana Wireless Support",
+      "url": "http://support.taranawireless.com/",
+      "email": "support@taranawireless.com"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v0/find/bns/issues": {
+      "post": {
+        "tags": [
+          "find"
+        ],
+        "summary": "List Bns With Issues",
+        "description": "<pre><tt>\n<b><big>Find BNs with TCS Data Issues.</big></b>\nThis endpoint retrieves a list of Base Nodes (BNs) for a given operator that have TCS data\nissues: missing coordinates or frequency and/or incorrect height or tilt.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nresponse_format    str                     The format of the response: 'csv' or 'json'                 <b>Required</b>\noperator           Optional[str]           The operator name\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nbn_list            BNListOutput            An output object containing the list of BNs within the specified rectangular area\n</tt></pre>",
+        "operationId": "list_bns_with_issues_v0_find_bns_issues_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "response_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>",
+              "default": "csv",
+              "title": "Response Format"
+            },
+            "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BNListIssues"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/report": {
+      "get": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Report",
+        "description": "<pre><tt>\n<b><big>Prediction Report API.</big></b>\nThis endpoint reports on all predictions (single and multi-sector) made over the past number of\ndays specified (default = 7 days). An aggregated CSV file, containing the CSV portion of all the\npredictions made, is returned, ordered newest to oldest.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\ndays               Optional[int]           The report timeframe in days (default = 7)\ndownload           Optional[bool]          Set true for a download URL instead of a direct response\n<br>\n<b><u>Returns            Type                    Description</u></b>\ncsv                str                     The aggregated CSV output of all predictions\n</tt></pre>",
+        "operationId": "predict_report_v0_predict_report_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<pre><tt><b><big>Set to true to get a download URL instead of a direct response</big></b></tt></pre>",
+              "default": false,
+              "title": "Download"
+            },
+            "description": "<pre><tt><b><big>Set to true to get a download URL instead of a direct response</big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector": {
+      "post": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Sector",
+        "description": "<pre><tt>\n<b><big>Single Sector Prediction API.</big></b>\nThis endpoint predicts the path loss and speed for a single sector, which consists of one Base\nNode (BN) and one or more Remote Nodes (RNs). It takes the Sector object containing information\nabout the BN and RNs as input and returns an output object containing the predicted path loss,\nspeed, and other relevant information for the sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes (limit 100)                        <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn                 Optional[BN]            The base node (used instead of TCS lookup)\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector output\nbn                 BN                      The base node\nrn_list            List[RNOutput]          The list of remote node outputs\n</tt></pre>",
+        "operationId": "predict_sector_v0_predict_sector_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Create path loss and link speed probability graphs</b>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<b>Create path loss and link speed probability graphs</b>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sector"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorOutput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/submit": {
+      "post": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Sector Submit",
+        "description": "<pre><tt>\n<b><big>Submit a Single Sector Prediction Job.</big></b>\nThis endpoint submits a job to predict the path loss and speed for a sector in the background.\nIt returns immediately with the request ID that can be used to query the status of the prediction.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes (limit 100)                        <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn                 Optional[BN]            The base node (used instead of TCS lookup)\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator who submitted the prediction job\nrequest_id         str                     The unique identifier for the prediction request\nmessage            str                     A message indicating the status of the submission\n</tt></pre>",
+        "operationId": "predict_sector_submit_v0_predict_sector_submit_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Create path loss and link speed probability graphs</b>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<b>Create path loss and link speed probability graphs</b>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sector"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/status/{request_id}": {
+      "get": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Sector Status",
+        "description": "<pre><tt>\n<b><big>Get Status for a Single Sector Prediction Job.</big></b>\nThis endpoint returns the prediction status, including the progress of prediction for Base Nodes (BNs)\nand Remote Nodes (RNs), as well as the overall progress for all devices combined.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\nprediction_state   str                     The prediction state: executing or completed\nall                PredictionProgress      The prediction progress for all devices combined\nrns                PredictionProgress      The prediction progress for RNs\nbns                PredictionProgress      The prediction progress for BNs\n</tt></pre>",
+        "operationId": "predict_sector_status_v0_predict_sector_status__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/result/{request_id}": {
+      "get": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Sector Result",
+        "description": "<pre><tt>\n<b><big>Get Results for a Single Sector Prediction Job.</big></b>\nThis endpoint returns the prediction results, providing an output object containing\nthe predicted path loss, speed, and other relevant information for the sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\ndownload           bool                    Set true for a download URL instead of a direct response\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector output\nbn                 BN                      The base node\nrn_list            List[RNOutput]          The list of remote node outputs\n<b>OR</b>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The name of the operator\nrequest_id         str                     The unique identifier for the prediction request\njson_response_url  str                     The URL where the JSON prediction results can be downloaded\ncsv_response_url   str                     The URL where the CSV  prediction results can be downloaded\n</tt></pre>",
+        "operationId": "predict_sector_result_v0_predict_sector_result__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Set to true to get a download URL instead of a direct response</b>",
+              "default": false,
+              "title": "Download"
+            },
+            "description": "<b>Set to true to get a download URL instead of a direct response</b>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SectorOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PredictionResults"
+                    }
+                  ],
+                  "title": "Response Predict Sector Result V0 Predict Sector Result  Request Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector": {
+      "post": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Multisector",
+        "description": "<pre><tt>\n<b><big>Multi-Sector Prediction API.</big></b>\nThis endpoint predicts the path loss and speed for multiple sectors, each consisting of one\nBase Node (BN) and one or more Remote Nodes (RNs). It takes the MultiSector object containing\ninformation about the BNs, RNs, and optional additional BNs as input and returns an output\nobject containing the predicted path loss, speed, and other relevant information for each sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes (limit 100)                        <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn_list            Optional[List[BN]]      The list of base nodes (used in addition to TCS lookup)\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector outputs\nsector_list        List[SectorOutput]      The list of sector outputs\n</tt></pre>",
+        "operationId": "predict_multisector_v0_predict_multi_sector_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Create path loss and link speed probability graphs</b>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<b>Create path loss and link speed probability graphs</b>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MultiSector"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiSectorOutput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/submit": {
+      "post": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Multisector Submit",
+        "description": "<pre><tt>\n<b><big>Submit a Multi-Sector Prediction Job.</big></b>\nThis endpoint submits a job to predict the path loss and speed for multiple sectors in the background.\nIt returns immediately with the request ID that can be used to query the status of the prediction.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes (limit 100)                        <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn_list            Optional[List[BN]]      The list of base nodes (used in addition to TCS lookup)\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator who submitted the prediction job\nrequest_id         str                     The unique identifier for the prediction request\nmessage            str                     A message indicating the status of the submission\n</tt></pre>",
+        "operationId": "predict_multisector_submit_v0_predict_multi_sector_submit_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Create path loss and link speed probability graphs</b>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<b>Create path loss and link speed probability graphs</b>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MultiSector"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/status/{request_id}": {
+      "get": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Multisector Status",
+        "description": "<pre><tt>\n<b><big>Get Status for a Multi-Sector Prediction Job.</big></b>\nThis endpoint returns the prediction status, including the progress of prediction for Base Nodes (BNs)\nand Remote Nodes (RNs), as well as the overall progress for all devices combined.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\nprediction_state   str                     The prediction state: executing or completed\nall                PredictionProgress      The prediction progress for all devices combined\nrns                PredictionProgress      The prediction progress for RNs\nbns                PredictionProgress      The prediction progress for BNs\n</tt></pre>",
+        "operationId": "predict_multisector_status_v0_predict_multi_sector_status__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/result/{request_id}": {
+      "get": {
+        "tags": [
+          "predict"
+        ],
+        "summary": "Predict Multisector Result",
+        "description": "<pre><tt>\n<b><big>Get Results for a Multi-Sector Prediction Job.</big></b>\nThis endpoint returns the prediction results, returning an output object containing\nthe predicted path loss, speed, and other relevant information for each sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\ndownload           bool                    Set true for a download URL instead of a direct response\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector outputs\nsector_list        List[SectorOutput]      The list of sector outputs\n<b>OR</b>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The name of the operator\nrequest_id         str                     The unique identifier for the prediction request\njson_response_url  str                     The URL where the JSON prediction results can be downloaded\ncsv_response_url   str                     The URL where the CSV  prediction results can be downloaded\n</tt></pre>",
+        "operationId": "predict_multisector_result_v0_predict_multi_sector_result__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Set to true to get a download URL instead of a direct response</b>",
+              "default": false,
+              "title": "Download"
+            },
+            "description": "<b>Set to true to get a download URL instead of a direct response</b>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MultiSectorOutput"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PredictionResults"
+                    }
+                  ],
+                  "title": "Response Predict Multisector Result V0 Predict Multi Sector Result  Request Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/csv": {
+      "post": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Sector Csv",
+        "description": "<pre><tt>\n<b><big>Single Sector CSV Prediction API.</big></b>\nThis endpoint predicts the path loss and speed for a single sector, which consists of one Base\nNode (BN) and one or more Remote Nodes (RNs). It takes the multiple .csv files containing\ninformation about the BN and RNs as input and returns an output object containing the predicted\npath loss, speed, and other relevant information for the sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_csv_file        UploadFile              The CSV file with information on the RNs (limit 100)        <b>Required</b>\nheight_csv_file    Optional[UploadFile]    The CSV file with information on the heights of the RNs\nbn_csv_file        Optional[UploadFile]    The CSV file with information on additional BNs to use\nresponse_format    str                     The format of the response: 'csv' or 'json'                 <b>Required</b>\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector output\nbn                 BN                      The base node\nrn_list            List[RNOutput]          The list of remote node outputs\n</tt></pre>",
+        "operationId": "predict_sector_csv_v0_predict_sector_csv_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "response_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>",
+              "default": "csv",
+              "title": "Response Format"
+            },
+            "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>"
+          },
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SectorCSVRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/csv/submit": {
+      "post": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Sector Csv Submit",
+        "description": "<pre><tt>\n<b><big>Submit a Single Sector CSV Prediction Job.</big></b>\nThis endpoint submits a job to predict the path loss and speed for a sector in the background.\nIt returns immediately with the request ID that can be used to query the status of the prediction.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_csv_file        UploadFile              The CSV file with information on the RNs (limit 100)        <b>Required</b>\nheight_csv_file    Optional[UploadFile]    The CSV file with information on the heights of the RNs\nbn_csv_file        Optional[UploadFile]    The CSV file with information on additional BNs to use\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator who submitted the prediction job\nrequest_id         str                     The unique identifier for the prediction request\nmessage            str                     A message indicating the status of the submission\n</tt></pre>",
+        "operationId": "predict_sector_csv_submit_v0_predict_sector_csv_submit_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/SectorCSVSubmitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/csv/status/{request_id}": {
+      "get": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Sector Csv Status",
+        "description": "<pre><tt>\n<b><big>Get Status for a Single Sector CSV Prediction Job.</big></b>\nThis endpoint returns the prediction status, including the progress of prediction for Base Nodes (BNs)\nand Remote Nodes (RNs), as well as the overall progress for all devices combined.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\nprediction_state   str                     The prediction state: executing or completed\nall                PredictionProgress      The prediction progress for all devices combined\nrns                PredictionProgress      The prediction progress for RNs\nbns                PredictionProgress      The prediction progress for BNs\n</tt></pre>",
+        "operationId": "predict_sector_csv_status_v0_predict_sector_csv_status__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/sector/csv/result/{request_id}": {
+      "get": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Sector Csv Result",
+        "description": "<pre><tt>\n<b><big>Get Results for a Single Sector CSV Prediction Job.</big></b>\nThis endpoint returns the prediction results, providing an output object containing\nthe predicted path loss, speed, and other relevant information for the sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\nresponse_format    str                     The format of the response: 'csv' or 'json'                 <b>Required</b>\ndownload           bool                    Set true for a download URL instead of a direct response\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector output\nbn                 BN                      The base node\nrn_list            List[RNOutput]          The list of remote node outputs\n<b>OR</b>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The name of the operator\nrequest_id         str                     The unique identifier for the prediction request\njson_response_url  str                     The URL where the JSON prediction results can be downloaded\ncsv_response_url   str                     The URL where the CSV  prediction results can be downloaded\n</tt></pre>",
+        "operationId": "predict_sector_csv_result_v0_predict_sector_csv_result__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "response_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "<b>Specify the response format: 'csv' (default) or 'json'</b>",
+              "default": "csv",
+              "title": "Response Format"
+            },
+            "description": "<b>Specify the response format: 'csv' (default) or 'json'</b>"
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Set to true to get a download URL instead of a direct response</b>",
+              "default": false,
+              "title": "Download"
+            },
+            "description": "<b>Set to true to get a download URL instead of a direct response</b>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/csv": {
+      "post": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Multisector Csv",
+        "description": "<pre><tt>\n<b><big>Multi-Sector CSV Prediction API.</big></b>\nThis endpoint predicts the path loss and speed for multiple sectors, each consisting of one\nBase Node (BN) and one or more Remote Nodes (RNs). It takes multiple CSV files containing\ninformation about the BNs, RNs, and optional additional BNs as input and returns an output\nobject containing the predicted path loss, speed, and other relevant information for each sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_csv_file        UploadFile              The CSV file with information on the RNs (limit 100)        <b>Required</b>\nheight_csv_file    Optional[UploadFile]    The CSV file with information on the heights of the RNs\nbn_csv_file        Optional[UploadFile]    The CSV file with information on additional BNs to use\nresponse_format    str                     The format of the response: 'csv' or 'json'                 <b>Required</b>\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector outputs\nsector_list        List[SectorOutput]      The list of sector outputs\n</tt></pre>",
+        "operationId": "predict_multisector_csv_v0_predict_multi_sector_csv_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "response_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>",
+              "default": "csv",
+              "title": "Response Format"
+            },
+            "description": "<pre><tt><b><big>Specify the response format: 'csv' (default) or 'json'  </big></b></tt></pre>"
+          },
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MultiSectorCSVRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/csv/submit": {
+      "post": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Multisector Csv Submit",
+        "description": "<pre><tt>\n<b><big>Submit a Multi-Sector CSV Prediction Job.</big></b>\nThis endpoint submits a job to predict the path loss and speed for multiple sectors in the background.\nIt returns immediately with the request ID that can be used to query the status of the prediction.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_csv_file        UploadFile              The CSV file with information on the RNs (limit 100)        <b>Required</b>\nheight_csv_file    Optional[UploadFile]    The CSV file with information on the heights of the RNs\nbn_csv_file        Optional[UploadFile]    The CSV file with information on additional BNs to use\ncdf_graphs         bool                    Set true for path loss and link speed probability graphs    <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator who submitted the prediction job\nrequest_id         str                     The unique identifier for the prediction request\nmessage            str                     A message indicating the status of the submission\n</tt></pre>",
+        "operationId": "predict_multisector_csv_submit_v0_predict_multi_sector_csv_submit_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cdf_graphs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>",
+              "default": false,
+              "title": "Cdf Graphs"
+            },
+            "description": "<pre><tt><b><big>Create path loss and link speed probability graphs</big></b></tt></pre>"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MultiSectorCSVSubmitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionJob"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/csv/status/{request_id}": {
+      "get": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Multisector Csv Status",
+        "description": "<pre><tt>\n<b><big>Get Status for a Multi-Sector CSV Prediction Job.</big></b>\nThis endpoint returns the prediction status, including the progress of prediction for Base Nodes (BNs)\nand Remote Nodes (RNs), as well as the overall progress for all devices combined.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\n<br>\n<b><u>Returns            Type                    Description</u></b>\nprediction_state   str                     The prediction state: executing or completed\nall                PredictionProgress      The prediction progress for all devices combined\nrns                PredictionProgress      The prediction progress for RNs\nbns                PredictionProgress      The prediction progress for BNs\n</tt></pre>",
+        "operationId": "predict_multisector_csv_status_v0_predict_multi_sector_csv_status__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/predict/multi-sector/csv/result/{request_id}": {
+      "get": {
+        "tags": [
+          "predict csv"
+        ],
+        "summary": "Predict Multisector Csv Result",
+        "description": "<pre><tt>\n<b><big>Get Results for a Multi-Sector CSV Prediction Job.</big></b>\nThis endpoint returns the prediction results, providing an output object containing\nthe predicted path loss, speed, and other relevant information for each sector.\n<br>\n<b><u>Args               Type                    Description                                                 Required</u></b>\nrequest_id         str                     The unique identifier for the prediction request            <b>Required</b>\nresponse_format    str                     The format of the response: 'csv' or 'json'                 <b>Required</b>\ndownload           bool                    Set true for a download URL instead of a direct response\n<br>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector outputs\nsector_list        List[SectorOutput]      The list of sector outputs\n<b>OR</b>\n<b><u>Returns            Type                    Description</u></b>\noperator           str                     The name of the operator\nrequest_id         str                     The unique identifier for the prediction request\njson_response_url  str                     The URL where the JSON prediction results can be downloaded\ncsv_response_url   str                     The URL where the CSV  prediction results can be downloaded\n</tt></pre>",
+        "operationId": "predict_multisector_csv_result_v0_predict_multi_sector_csv_result__request_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "response_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "<b>Specify the response format: 'csv' (default) or 'json'</b>",
+              "default": "csv",
+              "title": "Response Format"
+            },
+            "description": "<b>Specify the response format: 'csv' (default) or 'json'</b>"
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "<b>Set to true to get a download URL instead of a direct response</b>",
+              "default": false,
+              "title": "Download"
+            },
+            "description": "<b>Set to true to get a download URL instead of a direct response</b>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v0/health/api-key": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Check Api Key",
+        "description": "<u>**Secure Endpoint that Requires an API Key for Authorization.**</u><br>\nThis endpoint returns a message confirming the authorization status of the provided API key.\n\n**Args:**<br>\n    operator (str): The name of the operator authorized by the API key. This is determined by the `verify_api_key` function.\n\n**Returns:**<br>\n    Dict[str, str]: A dictionary containing a message that confirms the operator authorized by the provided API key.",
+        "operationId": "check_api_key_v0_health_api_key_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "root"
+        ],
+        "summary": "Read Root",
+        "description": "<u>**Defines a simple root entry point for accessing the API documentation.**</u><br>\nThis asynchronous function provides a basic root entry point for the API, ensuring that users receive instructions on how to access the API documentation.\nIt returns a string containing the application name and instructions to append \"/docs\" to the URL to view the API definition.\n\n**Returns:**<br>\n    str: A string containing the application name and instructions to access the API documentation.",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIMLOutput": {
+        "properties": {
+          "path_loss": {
+            "$ref": "#/components/schemas/Distribution",
+            "description": "Units: db"
+          },
+          "link_speed": {
+            "$ref": "#/components/schemas/Distribution",
+            "description": "Units: Mbps"
+          },
+          "link_close_confidence": {
+            "type": "number",
+            "title": "Link Close Confidence",
+            "description": "Confidence ranking 0-1.0 (-1.0 indicates invalid)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path_loss",
+          "link_speed",
+          "link_close_confidence"
+        ],
+        "title": "AIMLOutput",
+        "description": "<pre><tt>\n<b><big>Represents the output of an AI/ML model</big></b>\n<br>\n<b><u>Attribute            Type                    Description</u></b>\npath_loss              Distribution            The path loss distribution, given that the link closes\nlink_speed             Distribution            The link speed distribution, given that the link closes\nlink_close_confidence  float                   The model's confidence that the link will close\n</tt></pre>"
+      },
+      "AIMLOutputURL": {
+        "properties": {
+          "path_loss": {
+            "type": "string",
+            "title": "Path Loss"
+          },
+          "link_speed": {
+            "type": "string",
+            "title": "Link Speed"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path_loss",
+          "link_speed",
+          "confidence"
+        ],
+        "title": "AIMLOutputURL",
+        "description": "<pre><tt>\n<b><big>Represents AIML prediction URLs</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\npath_loss              str                 Path Loss  heatmap URL\nlink_speed             str                 Link Speed heatmap URL\nlink_close_confidence  str                 Link Close heatmap URL\n</tt></pre>"
+      },
+      "BN": {
+        "properties": {
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "market": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cell": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "hostname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostname"
+          },
+          "serial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude",
+            "description": "Units: degrees"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude",
+            "description": "Units: degrees"
+          },
+          "height_agl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Agl",
+            "description": "Units: meters  (height above ground level)"
+          },
+          "azimuth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Azimuth",
+            "description": "Units: degrees (from north)"
+          },
+          "downtilt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Downtilt",
+            "description": "Units: degrees (from level)"
+          },
+          "carrier": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Carrier"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carrier",
+            "description": "List of carriers"
+          },
+          "network_profile": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Network Profile",
+            "description": "Network profile: 1, 2, 5, or 6 (default: 1)"
+          },
+          "height_gps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Gps",
+            "description": "Units: meters (height above mean sea level, from GPS, information only)"
+          },
+          "ground_msl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ground Msl",
+            "description": "Units: meters (ground level, above mean sea level, information only)"
+          },
+          "sector_cnt": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector Cnt"
+          },
+          "subscribers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscribers"
+          },
+          "firmware": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firmware"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp"
+          },
+          "data_issues": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Issues"
+          },
+          "heatmap_legends": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeatMapLegends"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "heatmap_list": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HeatMapInfo"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heatmap List"
+          }
+        },
+        "type": "object",
+        "required": [
+          "heatmap_legends",
+          "heatmap_list"
+        ],
+        "title": "BN",
+        "description": "<pre><tt>\n<b><big>Represents a Base Node (BN)</big></b>\nUsed on output to supply information about BNs used for predictions\n<br>\n<b><u>Attribute          Type                        Description                                              Required</u></b>\noperator           Optional[str]               The operator name\nregion             Optional[str]               The region   name\nmarket             Optional[str]               The market   name\nsite               Optional[str]               The site     name\ncell               Optional[str]               The cell     name\nsector             Optional[str]               The sector   name\nhostname           Optional[str]               The network  hostname\nserial             Optional[str]               The BN serial number\nlatitude           Optional[float]             The latitude  in degrees\nlongitude          Optional[float]             The longitude in degrees\nheight_agl         Optional[float]             The height above ground level in meters\nazimuth            Optional[float]             The azimuth  angle in degrees from north\ndowntilt           Optional[float]             The downtilt angle in degrees from level\ncarrier            Optional[List[Carrier]]     The list of carriers\nnetwork_profile    Optional[int]               The network profile: 1, 2, 5, or 6 (default: 1)\nheight_gps         Optional[float]             The height above mean sea level in meters (from GPS)\nground_msl         Optional[float]             The ground level above mean sea level in meters\nsector_cnt         Optional[int]               The count of sectors on the tower\nsubscribers        Optional[int]               The number of subscribers\nfirmware           Optional[str]               The firmware version\ntimestamp          Optional[str]               The timestamp data was last collected\ndata_issues        Optional[str]               The set of data issues (if any) for this BN\nheatmap_list       Optional[List[HeatMapInfo]] The set of heatmaps URLs for this BNs\n</tt></pre>"
+      },
+      "BNInput": {
+        "properties": {
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "market": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "cell": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell"
+          },
+          "sector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector"
+          },
+          "hostname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostname"
+          },
+          "serial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude",
+            "description": "Units: degrees"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude",
+            "description": "Units: degrees"
+          },
+          "height_agl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Agl",
+            "description": "Units: meters  (height above ground level)"
+          },
+          "azimuth": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Azimuth",
+            "description": "Units: degrees (from north)"
+          },
+          "downtilt": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Downtilt",
+            "description": "Units: degrees (from level)"
+          },
+          "carrier": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Carrier"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carrier",
+            "description": "List of carriers"
+          },
+          "network_profile": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Network Profile",
+            "description": "Network profile: 1, 2, 5, or 6 (default: 1)"
+          }
+        },
+        "type": "object",
+        "title": "BNInput",
+        "description": "<pre><tt>\n<b><big>Represents a Base Node (BN)</big></b>\nUsed on input to supply information for prospective new BNs not yet in TCS\n<br>\n<b><u>Attribute          Type                     Description                                                 Required</u></b>\nregion             Optional[str]            The region  name\nmarket             Optional[str]            The market  name\nsite               Optional[str]            The site    name\ncell               Optional[str]            The cell    name\nsector             Optional[str]            The sector  name\nhostname           Optional[str]            The network hostname\nserial             Optional[str]            The BN serial number                                        <b>Serial number      OR</b>\nlatitude           Optional[float]          The latitude  in degrees                                    <b>Latitude          AND</b>\nlongitude          Optional[float]          The longitude in degrees                                    <b>Longitude         AND</b>\nheight_agl         Optional[float]          The height above ground level in meters                     <b>Height AGL        AND</b>\nazimuth            Optional[float]          The azimuth  angle in degrees from north                    <b>Azimuth           AND</b>\ndowntilt           Optional[float]          The downtilt angle in degrees from level                    <b>Downtilt          AND</b>\ncarrier            Optional[List[Carrier]]  The list of carriers                                        <b>Carriers are required</b>\nnetwork_profile    Optional[int]            The network profile: 1, 2, 5, or 6 (default: 1)\n</tt></pre>"
+      },
+      "BNListIssues": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          }
+        },
+        "type": "object",
+        "title": "BNListIssues"
+      },
+      "Carrier": {
+        "properties": {
+          "frequency": {
+            "type": "integer",
+            "title": "Frequency",
+            "description": "Units: MHz (required)"
+          },
+          "bandwidth": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bandwidth",
+            "description": "Units: MHz"
+          },
+          "tx_power": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Power",
+            "description": "Units: db"
+          }
+        },
+        "type": "object",
+        "required": [
+          "frequency"
+        ],
+        "title": "Carrier",
+        "description": "<pre><tt>\n<b><big>Represents a carrier</big></b>\n<br>\n<b><u>Attribute          Type                    Description                                                 Required</u></b>\nfrequency          int                     The frequency in MHz                                        <b>Required</b>\nbandwidth          Optional[int]           The bandwidth in MHz\ntx_power           Optional[int]           The transmission power in dB\n</tt></pre>"
+      },
+      "Distribution": {
+        "properties": {
+          "average": {
+            "type": "number",
+            "title": "Average",
+            "default": 0
+          },
+          "std_dev": {
+            "type": "number",
+            "title": "Std Dev",
+            "default": 0
+          },
+          "percent": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Percent",
+            "default": []
+          },
+          "values": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Values",
+            "default": []
+          },
+          "cdf_url": {
+            "type": "string",
+            "title": "Cdf Url",
+            "default": ""
+          },
+          "cdf_svg": {
+            "type": "string",
+            "title": "Cdf Svg",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "Distribution",
+        "description": "<pre><tt>\n<b><big>Represents a probability distribution</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\naverage            float                   The average value\nstd_dev            float                   The standard deviation value\npercent            List[int]               The list of percentages\nvalues             List[int]               The list of corresponding values\ncdf_url            str                     The CDF SVG GCS bucket URL\n</tt></pre>"
+      },
+      "GNPErrors": {
+        "properties": {
+          "free_space": {
+            "type": "string",
+            "title": "Free Space"
+          },
+          "fixed_wireless": {
+            "type": "string",
+            "title": "Fixed Wireless"
+          },
+          "mobility_macro": {
+            "type": "string",
+            "title": "Mobility Macro"
+          },
+          "mobility_micro": {
+            "type": "string",
+            "title": "Mobility Micro"
+          }
+        },
+        "type": "object",
+        "required": [
+          "free_space",
+          "fixed_wireless",
+          "mobility_macro",
+          "mobility_micro"
+        ],
+        "title": "GNPErrors",
+        "description": "<pre><tt>\n<b><big>Represents GNP calculation errors</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nfree_space         str                     Free space     calculation error message\nfixed_wireless     str                     Fixed wireless calculation error message\nmobility_macro     str                     Mobility macro calculation error message\nmobility_micro     str                     Mobility micro calculation error message\n</tt></pre>"
+      },
+      "GNPOutputURL": {
+        "properties": {
+          "free_space": {
+            "type": "string",
+            "title": "Free Space"
+          },
+          "fixed_wireless": {
+            "type": "string",
+            "title": "Fixed Wireless"
+          },
+          "mobility_macro": {
+            "type": "string",
+            "title": "Mobility Macro"
+          },
+          "mobility_micro": {
+            "type": "string",
+            "title": "Mobility Micro"
+          },
+          "fresnel_clearance": {
+            "type": "string",
+            "title": "Fresnel Clearance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "free_space",
+          "fixed_wireless",
+          "mobility_macro",
+          "mobility_micro",
+          "fresnel_clearance"
+        ],
+        "title": "GNPOutputURL",
+        "description": "<pre><tt>\n<b><big>Represents GNP heatmap URLs</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nfree_space         str                     Free space        heatmap URL\nfixed_wireless     str                     Fixed wireless    heatmap URL\nmobility_macro     str                     Mobility macro    heatmap URL\nmobility_micro     str                     Mobility micro    heatmap URL\nfresnel_clearance  str                     Fresnel clearance heatmap URL\n</tt></pre>"
+      },
+      "GNPPathLoss": {
+        "properties": {
+          "free_space": {
+            "type": "number",
+            "title": "Free Space",
+            "description": "Units: db"
+          },
+          "fixed_wireless": {
+            "type": "number",
+            "title": "Fixed Wireless",
+            "description": "Units: db"
+          },
+          "mobility_macro": {
+            "type": "number",
+            "title": "Mobility Macro",
+            "description": "Units: db"
+          },
+          "mobility_micro": {
+            "type": "number",
+            "title": "Mobility Micro",
+            "description": "Units: db"
+          }
+        },
+        "type": "object",
+        "required": [
+          "free_space",
+          "fixed_wireless",
+          "mobility_macro",
+          "mobility_micro"
+        ],
+        "title": "GNPPathLoss",
+        "description": "<pre><tt>\n<b><big>Represents GNP path loss configuration</big></b>\n<br>\n<b><u>Attribute         Type                    Description</u></b>\nfree_space         float                   Free space     path loss value\nfixed_wireless     float                   Fixed wireless path loss value\nmobility_macro     float                   Mobility macro path loss value\nmobility_micro     float                   Mobility micro path loss value\n</tt></pre>"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HeatMapInfo": {
+        "properties": {
+          "height": {
+            "$ref": "#/components/schemas/Height"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "geotiff": {
+            "$ref": "#/components/schemas/HeatMapURLs"
+          },
+          "kmz": {
+            "$ref": "#/components/schemas/HeatMapURLs"
+          },
+          "kml": {
+            "$ref": "#/components/schemas/HeatMapURLs"
+          },
+          "overlay": {
+            "$ref": "#/components/schemas/HeatMapURLs"
+          },
+          "legend": {
+            "$ref": "#/components/schemas/HeatMapURLs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "height",
+          "base_url",
+          "geotiff",
+          "kmz",
+          "kml",
+          "overlay",
+          "legend"
+        ],
+        "title": "HeatMapInfo",
+        "description": "<pre><tt>\n<b><big>Represents all heatmap prediction information</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nheight                 Height              The height used for the heatmap generation\nbase_url               str                 The common URL prefix for heatmaps at this height\ngeotiff                HeatmapURLs         The set of URLs for the heatmap GeoTIFFs\nkmz                    HeatmapURLs         The set of URLs for the heatmap KMZ files\nkml                    HeatmapURLs         The set of URLs for the heatmap KML files\noverlay                HeatmapURLs         The set of URLs for the heatmap overlay PNG files\nlegend                 HeatmapURLs         The set of URLs for the heatmap legend  PNG files\n</tt></pre>"
+      },
+      "HeatMapLegends": {
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "confidence": {
+            "type": "string",
+            "title": "Confidence"
+          },
+          "fresnel_clearance": {
+            "type": "string",
+            "title": "Fresnel Clearance"
+          },
+          "path_loss_3ghz": {
+            "type": "string",
+            "title": "Path Loss 3Ghz"
+          },
+          "path_loss_5ghz": {
+            "type": "string",
+            "title": "Path Loss 5Ghz"
+          },
+          "linkspeed_x2": {
+            "type": "string",
+            "title": "Linkspeed X2"
+          },
+          "linkspeed_3ghz": {
+            "type": "string",
+            "title": "Linkspeed 3Ghz"
+          },
+          "linkspeed_5ghz": {
+            "type": "string",
+            "title": "Linkspeed 5Ghz"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "confidence",
+          "fresnel_clearance",
+          "path_loss_3ghz",
+          "path_loss_5ghz",
+          "linkspeed_x2",
+          "linkspeed_3ghz",
+          "linkspeed_5ghz"
+        ],
+        "title": "HeatMapLegends",
+        "description": "<pre><tt>\n<b><big>Represents heatmap prediction legends</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nbase_url               str                 The URL common to all legends\nconfidence             str                 The URL for the confidence            legend\nfresnel_clearance      str                 The URL for the fresnel clearance     legend\npath_loss_3ghz         str                 The URL for the 3   GHz path loss     legend\npath_loss_5ghz         str                 The URL for the 5/6 GHz path loss     legend\nlinkspeed_x2           str                 The URL for the 6 GHz   x2 link speed legend\nlinkspeed_3ghz         str                 The URL for the 3 GHz   x1 link speed legend\nlinkspeed_5ghz         str                 The URL for the 5/6 GHz x1 link speed legend\n</tt></pre>"
+      },
+      "HeatMapURLs": {
+        "properties": {
+          "gnp_output": {
+            "$ref": "#/components/schemas/GNPOutputURL"
+          },
+          "aiml_output": {
+            "$ref": "#/components/schemas/AIMLOutputURL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gnp_output",
+          "aiml_output"
+        ],
+        "title": "HeatMapURLs",
+        "description": "<pre><tt>\n<b><big>Represents all heatmap prediction URLs</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\ngnp_output             GNPOutputURL        GNP   Heatmap Output URLs\naiml_output            AIMLOutputURL       AI/ML Heatmap Output URLs\n</tt></pre>"
+      },
+      "Height": {
+        "properties": {
+          "above_open": {
+            "type": "number",
+            "title": "Above Open",
+            "description": "Units: meters (above ground when not building mounted, required)"
+          },
+          "above_roof": {
+            "type": "number",
+            "title": "Above Roof",
+            "description": "Units: meters (above structure  when building mounted, required)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "above_open",
+          "above_roof"
+        ],
+        "title": "Height",
+        "description": "<pre><tt>\n<b><big>Represents the heights at which an RN is installed</big></b>\n<br>\n<b><u>Attribute          Type                    Description                                                 Required</u></b>\nabove_open         float                   The height in meters above ground when not building mounted <b>Required</b>\nabove_roof         float                   The height in meters above building when building mounted   <b>Required</b>\n</tt></pre>"
+      },
+      "Mount": {
+        "properties": {
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Enum: above open or above building"
+          },
+          "height_agl": {
+            "type": "number",
+            "title": "Height Agl",
+            "description": "Units: meters (above ground level)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "location",
+          "height_agl"
+        ],
+        "title": "Mount",
+        "description": "<pre><tt>\n<b><big>Represents the manner in which an RN is installed</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nlocation           str                     The location the RN was mounted: above open or above building\nheight_agl         float                   The height in meters above the ground where mounted\n</tt></pre>"
+      },
+      "MultiSector": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "rn_list": {
+            "items": {
+              "$ref": "#/components/schemas/RN"
+            },
+            "type": "array",
+            "title": "Rn List"
+          },
+          "rn_heights": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Height"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rn Heights",
+            "default": [
+              {
+                "above_open": 5,
+                "above_roof": 1
+              },
+              {
+                "above_open": 7,
+                "above_roof": 2
+              },
+              {
+                "above_open": 10,
+                "above_roof": 3
+              }
+            ]
+          },
+          "bn_list": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BNInput"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bn List"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_list"
+        ],
+        "title": "MultiSector",
+        "description": "<pre><tt>\n<b><big>Represents multiple sectors for pathloss predictions</big></b>\nUsed on input to supply information for a multi-sector (multiple BN) pathloss prediction\n<br>\n<b><u>Attribute          Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes                                    <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn_list            Optional[List[BN]]      The list of base nodes (used in addition to TCS lookup)\n</tt></pre>"
+      },
+      "MultiSectorCSVRequest": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "<pre><tt><b><big>Optional email address of the requestor</big></b></tt></pre>"
+          },
+          "rn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Rn Csv File",
+            "description": "<pre><tt><u><b><big>Required RNs .csv file for prediction</big></b></u><br><b>Required columns:</b> rn.address     or  rn.latitude       and  rn.longitude<br><b>Optional columns:</b> rn.subscriber      rn.heights.above_open  rn.heights.above_roof   rn.bn_serial</tt></pre>"
+          },
+          "height_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Height Csv File",
+            "description": "<pre><tt><u><b><big>Optional RN heights .csv file for prediction</big></b></u><br><b>Required columns:</b> height.above_open  height.above_roof</tt></pre>"
+          },
+          "bn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Bn Csv File",
+            "description": "<pre><tt><u><b><big>Optional additional BNs .csv file for prediction</big></b></u><br><b>Required columns:</b><br>bn.serial (unique id)   bn.latitude             bn.longitude            bn.height_agl<br>bn.azimuth              bn.downtilt             bn.carrier.0.frequency  bn.carrier.1.frequency<br><b>Optional columns:</b><br>bn.operator             bn.region               bn.market               bn.site<br>bn.cell                 bn.sector               bn.hostname             bn.network_profile<br>bn.carrier.0.bandwidth  bn.carrier.0.tx_power   bn.carrier.2.frequency  bn.carrier.2.bandwidth  bn.carrier.2.tx_power<br>bn.carrier.1.bandwidth  bn.carrier.1.tx_power   bn.carrier.3.frequency  bn.carrier.3.bandwidth  bn.carrier.3.tx_power</tt></pre>"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_csv_file"
+        ],
+        "title": "MultiSectorCSVRequest"
+      },
+      "MultiSectorCSVSubmitRequest": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "<pre><tt><b><big>Optional email address of the requestor</big></b></tt></pre>"
+          },
+          "rn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Rn Csv File",
+            "description": "<pre><tt><u><b><big>Required RNs .csv file for prediction</big></b></u><br><b>Required columns:</b> rn.address     or  rn.latitude       and  rn.longitude<br><b>Optional columns:</b> rn.subscriber      rn.heights.above_open  rn.heights.above_roof   rn.bn_serial</tt></pre>"
+          },
+          "height_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Height Csv File",
+            "description": "<pre><tt><u><b><big>Optional RN heights .csv file for prediction</big></b></u><br><b>Required columns:</b> height.above_open  height.above_roof</tt></pre>"
+          },
+          "bn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Bn Csv File",
+            "description": "<pre><tt><u><b><big>Optional additional BNs .csv file for prediction</big></b></u><br><b>Required columns:</b><br>bn.serial (unique id)   bn.latitude             bn.longitude            bn.height_agl<br>bn.azimuth              bn.downtilt             bn.carrier.0.frequency  bn.carrier.1.frequency<br><b>Optional columns:</b><br>bn.operator             bn.region               bn.market               bn.site<br>bn.cell                 bn.sector               bn.hostname             bn.network_profile<br>bn.carrier.0.bandwidth  bn.carrier.0.tx_power   bn.carrier.2.frequency  bn.carrier.2.bandwidth  bn.carrier.2.tx_power<br>bn.carrier.1.bandwidth  bn.carrier.1.tx_power   bn.carrier.3.frequency  bn.carrier.3.bandwidth  bn.carrier.3.tx_power</tt></pre>"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_csv_file"
+        ],
+        "title": "MultiSectorCSVSubmitRequest"
+      },
+      "MultiSectorOutput": {
+        "properties": {
+          "operator": {
+            "type": "string",
+            "title": "Operator"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "csv": {
+            "type": "string",
+            "title": "Csv"
+          },
+          "sector_list": {
+            "items": {
+              "$ref": "#/components/schemas/SectorOutput"
+            },
+            "type": "array",
+            "title": "Sector List"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operator",
+          "email",
+          "csv",
+          "sector_list"
+        ],
+        "title": "MultiSectorOutput",
+        "description": "<pre><tt>\n<b><big>Represents the output of a multi-sector pathloss prediction</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector outputs\nsector_list        List[SectorOutput]      The list of sector outputs\n</tt></pre>"
+      },
+      "PredictionJob": {
+        "properties": {
+          "operator": {
+            "type": "string",
+            "title": "Operator"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operator",
+          "request_id",
+          "message"
+        ],
+        "title": "PredictionJob",
+        "description": "<pre><tt>\n<b><big>Represents the details of a submitted prediction job</big></b>\nThis model is used to return information about a prediction job that has been submitted\nfor processing. It contains the operator who submitted the job and the unique identifier\nfor the prediction request.\n<br>\n<b><u>Attribute          Type                    Description</u></b>\noperator           str                     The operator who submitted the prediction job\nrequest_id         str                     The unique identifier for the prediction request\nmessage            str                     A message indicating the status of the submission\n</tt></pre>"
+      },
+      "PredictionProgress": {
+        "properties": {
+          "number_submitted": {
+            "type": "integer",
+            "title": "Number Submitted"
+          },
+          "number_processed": {
+            "type": "integer",
+            "title": "Number Processed"
+          },
+          "percent_complete": {
+            "type": "number",
+            "title": "Percent Complete",
+            "default": 0
+          },
+          "elapsed_time_now": {
+            "type": "number",
+            "title": "Elapsed Time Now",
+            "default": 0
+          },
+          "est_time_overall": {
+            "type": "number",
+            "title": "Est Time Overall",
+            "default": 0
+          },
+          "approx_time_left": {
+            "type": "number",
+            "title": "Approx Time Left",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "number_submitted",
+          "number_processed"
+        ],
+        "title": "PredictionProgress",
+        "description": "<pre><tt>\n<b><big>Represents the progress of a prediction for a specific type of device or group of devices</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nnumber_submitted   int                     The total number of predictions submitted\nnumber_processed   int                     The number of predictions processed so far\npercent_complete   float                   The percentage of completion of the prediction process\nest_time_overall   float                   The estimated overall time for completing all predictions\napprox_time_left   float                   The approximate time left to complete the remaining predictions\n</tt></pre>"
+      },
+      "PredictionResults": {
+        "properties": {
+          "operator": {
+            "type": "string",
+            "title": "Operator"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "json_response_url": {
+            "type": "string",
+            "title": "Json Response Url"
+          },
+          "csv_response_url": {
+            "type": "string",
+            "title": "Csv Response Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operator",
+          "request_id",
+          "json_response_url",
+          "csv_response_url"
+        ],
+        "title": "PredictionResults",
+        "description": "<pre><tt>\n<b><big>Represents the prediction results with operator name, request ID, and response URL</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\noperator           str                     The name of the operator\nrequest_id         str                     The unique identifier for the prediction request\njson_response_url  str                     The URL where the JSON prediction results can be downloaded\ncsv_response_url   str                     The URL where the CSV  prediction results can be downloaded\n</tt></pre>"
+      },
+      "PredictionStatus": {
+        "properties": {
+          "prediction_state": {
+            "type": "string",
+            "title": "Prediction State"
+          },
+          "all": {
+            "$ref": "#/components/schemas/PredictionProgress"
+          },
+          "rns": {
+            "$ref": "#/components/schemas/PredictionProgress"
+          },
+          "bns": {
+            "$ref": "#/components/schemas/PredictionProgress"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prediction_state",
+          "all",
+          "rns",
+          "bns"
+        ],
+        "title": "PredictionStatus",
+        "description": "<pre><tt>\n<b><big>Represents the progress of a prediction for all device types and groups of devices</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nprediction_state   str                     The prediction state: executing or completed\nall                PredictionProgress      The prediction progress for all devices combined\nrns                PredictionProgress      The prediction progress for RNs\nbns                PredictionProgress      The prediction progress for BNs\n</tt></pre>"
+      },
+      "RN": {
+        "properties": {
+          "subscriber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscriber"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude",
+            "description": "Units: degrees"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude",
+            "description": "Units: degrees"
+          },
+          "heights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Height"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Used as first set of heights in sector/multi-sector list of heights"
+          },
+          "bn_serial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bn Serial",
+            "description": "Used in multi-sector call to force prediction using the specified BN even if not optimal"
+          }
+        },
+        "type": "object",
+        "title": "RN",
+        "description": "<pre><tt>\n<b><big>Represents a Remote Node (RN)</big></b>\nUsed on input to supply information for prospective new RNs not yet installed\n<br>\n<b><u>Attribute          Type                    Description                                                 Required</u></b>\nsubscriber         Optional[str]           The subscriber identifier\naddress            Optional[str]           The address                                                 <b>Address  OR</b>\nlatitude           Optional[float]         The latitude  in degrees                                    <b>Lat/Long IS</b>\nlongitude          Optional[float]         The longitude in degrees                                    <b>Required   </b>\nheights            Optional[Height]        The height above structure or ground level in meters\nbn_serial          Optional[str]           The serial number of BN to be used even if non-optimal\n</tt></pre>"
+      },
+      "RNOutput": {
+        "properties": {
+          "rn": {
+            "$ref": "#/components/schemas/RN"
+          },
+          "mount": {
+            "$ref": "#/components/schemas/Mount"
+          },
+          "gps_distance": {
+            "type": "integer",
+            "title": "Gps Distance",
+            "description": "Units: meters"
+          },
+          "bn_rn_angle": {
+            "type": "integer",
+            "title": "Bn Rn Angle",
+            "description": "Units: degrees (from north)"
+          },
+          "rn_azimuth": {
+            "type": "integer",
+            "title": "Rn Azimuth",
+            "description": "Units: degrees (from north)"
+          },
+          "rn_tilt": {
+            "type": "number",
+            "title": "Rn Tilt",
+            "description": "Units: degrees"
+          },
+          "fresnel_clearance": {
+            "type": "integer",
+            "title": "Fresnel Clearance",
+            "description": "Units: percentage"
+          },
+          "gnp_pathloss": {
+            "$ref": "#/components/schemas/GNPPathLoss"
+          },
+          "gnp_errors": {
+            "$ref": "#/components/schemas/GNPErrors"
+          },
+          "profile_url": {
+            "type": "string",
+            "title": "Profile Url"
+          },
+          "profile_svg": {
+            "type": "string",
+            "title": "Profile Svg"
+          },
+          "aiml_output": {
+            "$ref": "#/components/schemas/AIMLOutput"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn",
+          "mount",
+          "gps_distance",
+          "bn_rn_angle",
+          "rn_azimuth",
+          "rn_tilt",
+          "fresnel_clearance",
+          "gnp_pathloss",
+          "gnp_errors",
+          "profile_url",
+          "profile_svg",
+          "aiml_output"
+        ],
+        "title": "RNOutput",
+        "description": "<pre><tt>\n<b><big>Represents the output of a prediction for an RN</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\nrn                 RN                      The RN\nmount              Mount                   The mounting location (above open or roof, and height agl)\ngps_distance       int                     The GPS distance between BN and RN in meters\nbn_rn_angle        int                     The angle between the BN and RN in degrees from north\nrn_azimuth         int                     The angle between the RN and BN in degrees from north\nrn_tilt            float                   The RN tilt angle in degrees\nfresnel_clearance  int                     The Fresnel clearance in percentage\ngnp_pathloss       GNPPathLoss             The GNP path loss configuration\ngnp_errors         GNPErrors               The GNP error messages\nprofile_url        str                     The SVG profile GCS bucket URL\naiml_output        AIMLOutput              The AI/ML model output\n</tt></pre>"
+      },
+      "ReportRequest": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days",
+            "description": "<pre><tt><b><big>Optional report timeframe in days (default=7)</big></b></tt></pre>"
+          }
+        },
+        "type": "object",
+        "title": "ReportRequest"
+      },
+      "Sector": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "rn_list": {
+            "items": {
+              "$ref": "#/components/schemas/RN"
+            },
+            "type": "array",
+            "title": "Rn List"
+          },
+          "rn_heights": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Height"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rn Heights",
+            "default": [
+              {
+                "above_open": 5,
+                "above_roof": 1
+              },
+              {
+                "above_open": 7,
+                "above_roof": 2
+              },
+              {
+                "above_open": 10,
+                "above_roof": 3
+              }
+            ]
+          },
+          "bn": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BNInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_list"
+        ],
+        "title": "Sector",
+        "description": "<pre><tt>\n<b><big>Represents a single sector for pathloss prediction</big></b>\nUsed on input to supply information for a single sector (1 BN) pathloss prediction\n<br>\n<b><u>Attribute          Type                    Description                                                 Required</u></b>\nemail              Optional[str]           The email address of the requestor\nrn_list            List[RN]                The list of remote nodes                                    <b>Required</b>\nrn_heights         Optional[List[Height]]  The list of heights to use for predictions\nbn                 Optional[BN]            The base node (used instead of TCS lookup)\n</tt></pre>"
+      },
+      "SectorCSVRequest": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "<pre><tt><b><big>Optional email address of the requestor</big></b></tt></pre>"
+          },
+          "rn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Rn Csv File",
+            "description": "<pre><tt><u><b><big>Required RNs .csv file for prediction</big></b></u><br><b>Required columns:</b> rn.address     or  rn.latitude       and  rn.longitude<br><b>Optional columns:</b> rn.subscriber      rn.heights.above_open  rn.heights.above_roof   rn.bn_serial</tt></pre>"
+          },
+          "height_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Height Csv File",
+            "description": "<pre><tt><u><b><big>Optional RN heights .csv file for prediction</big></b></u><br><b>Required columns:</b> height.above_open  height.above_roof</tt></pre>"
+          },
+          "bn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Bn Csv File",
+            "description": "<pre><tt><u><b><big>Optional additional BNs .csv file for prediction</big></b></u><br><b>Required columns:</b><br>bn.serial (unique id)   bn.latitude             bn.longitude            bn.height_agl<br>bn.azimuth              bn.downtilt             bn.carrier.0.frequency  bn.carrier.1.frequency<br><b>Optional columns:</b><br>bn.operator             bn.region               bn.market               bn.site<br>bn.cell                 bn.sector               bn.hostname             bn.network_profile<br>bn.carrier.0.bandwidth  bn.carrier.0.tx_power   bn.carrier.2.frequency  bn.carrier.2.bandwidth  bn.carrier.2.tx_power<br>bn.carrier.1.bandwidth  bn.carrier.1.tx_power   bn.carrier.3.frequency  bn.carrier.3.bandwidth  bn.carrier.3.tx_power</tt></pre>"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_csv_file"
+        ],
+        "title": "SectorCSVRequest"
+      },
+      "SectorCSVSubmitRequest": {
+        "properties": {
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator",
+            "description": "<pre><tt><b><big>Optional operator name</big></b></tt></pre>"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "<pre><tt><b><big>Optional email address of the requestor</big></b></tt></pre>"
+          },
+          "rn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Rn Csv File",
+            "description": "<pre><tt><u><b><big>Required RNs .csv file for prediction</big></b></u><br><b>Required columns:</b> rn.address     or  rn.latitude       and  rn.longitude<br><b>Optional columns:</b> rn.subscriber      rn.heights.above_open  rn.heights.above_roof   rn.bn_serial</tt></pre>"
+          },
+          "height_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Height Csv File",
+            "description": "<pre><tt><u><b><big>Optional RN heights .csv file for prediction</big></b></u><br><b>Required columns:</b> height.above_open  height.above_roof</tt></pre>"
+          },
+          "bn_csv_file": {
+            "type": "string",
+            "format": "binary",
+            "title": "Bn Csv File",
+            "description": "<pre><tt><u><b><big>Optional additional BNs .csv file for prediction</big></b></u><br><b>Required columns:</b><br>bn.serial (unique id)   bn.latitude             bn.longitude            bn.height_agl<br>bn.azimuth              bn.downtilt             bn.carrier.0.frequency  bn.carrier.1.frequency<br><b>Optional columns:</b><br>bn.operator             bn.region               bn.market               bn.site<br>bn.cell                 bn.sector               bn.hostname             bn.network_profile<br>bn.carrier.0.bandwidth  bn.carrier.0.tx_power   bn.carrier.2.frequency  bn.carrier.2.bandwidth  bn.carrier.2.tx_power<br>bn.carrier.1.bandwidth  bn.carrier.1.tx_power   bn.carrier.3.frequency  bn.carrier.3.bandwidth  bn.carrier.3.tx_power</tt></pre>"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rn_csv_file"
+        ],
+        "title": "SectorCSVSubmitRequest"
+      },
+      "SectorOutput": {
+        "properties": {
+          "operator": {
+            "type": "string",
+            "title": "Operator"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "csv": {
+            "type": "string",
+            "title": "Csv"
+          },
+          "bn": {
+            "$ref": "#/components/schemas/BN"
+          },
+          "rn_list": {
+            "items": {
+              "$ref": "#/components/schemas/RNOutput"
+            },
+            "type": "array",
+            "title": "Rn List"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operator",
+          "email",
+          "csv",
+          "bn",
+          "rn_list"
+        ],
+        "title": "SectorOutput",
+        "description": "<pre><tt>\n<b><big>Represents the output of a single sector pathloss prediction</big></b>\n<br>\n<b><u>Attribute          Type                    Description</u></b>\noperator           str                     The operator name\nemail              str                     The email address of the requestor\ncsv                str                     The CSV representation of the sector output\nbn                 BN                      The base node\nrn_list            List[RNOutput]          The list of remote node outputs\n</tt></pre>"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
+}
