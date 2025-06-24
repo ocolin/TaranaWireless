@@ -25,10 +25,10 @@ class Client
         $api_file = $api_file ?? __DIR__ . '/api.v.0.1.0.json';
 
         $this->swagger = new Swagger(
-            host: $host,
-            base_uri: '',
-            api_file: $api_file,
-            token: $api_key,
+                  host: $host,
+              base_uri: '',
+              api_file: $api_file,
+                 token: $api_key,
             token_name: 'X-API-Key'
         );
     }
@@ -41,9 +41,9 @@ class Client
     {
         $data = $data ?? [];
         return $this->swagger->path(
-            path: $path,
+              path: $path,
             method: $method,
-            data: $data
+              data: $data
         );
     }
 
