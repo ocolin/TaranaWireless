@@ -15,7 +15,8 @@ class Client
         ?string $host     = null,
         ?string $api_key  = null,
         ?string $api_file = null,
-           bool $local    = false
+           bool $local    = false,
+            int $timeout  = 20
     ) {
         if( $local === true ) {
             new LoadEnv( files: __DIR__ . '/../.env' );
@@ -29,7 +30,8 @@ class Client
               base_uri: '',
               api_file: $api_file,
                  token: $api_key,
-            token_name: 'X-API-Key'
+            token_name: 'X-API-Key',
+               timeout: $timeout
         );
     }
 
