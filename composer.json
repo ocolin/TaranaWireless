@@ -2,11 +2,11 @@
     "name": "ocolin/tarana-wireless",
     "description": "Basic REST client for Tarana Wireless API",
     "require": {
-        "ocolin/easyenv": "^2.2",
-        "ocolin/easy-swagger": "^2.0"
+        "ocolin/easyenv": "^2.4",
+        "ocolin/easy-swagger": "^2.7"
     },
     "require-dev": {
-        "phpunit/phpunit": "^12.1",
+        "phpunit/phpunit": "^12.3",
         "phpstan/phpstan": "^2.1"
     },
     "license": "MIT",
